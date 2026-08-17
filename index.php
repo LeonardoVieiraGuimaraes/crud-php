@@ -43,7 +43,10 @@
         <div class="col mt-5">
             <?php
                 include("config.php");
-                switch(@$_REQUEST["page"]) {
+
+                // A lista de casos é a própria autorização: qualquer valor fora
+                // dela cai no default, então não há como incluir arquivo arbitrário.
+                switch ($_GET["page"] ?? "") {
                     case "novo":
                         include("novo_usuario.php");
                         break;

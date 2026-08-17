@@ -1,37 +1,48 @@
+<h1>Excluir Usuário</h1>
+
 <?php
-    $sql = "SELECT * FROM usuarios WHERE id =". $_REQUEST["id"];
-    if (isset($conn)) {
-        $res = $conn->query($sql);
-        $row = $res->fetch_object();
-    }
-?>
+$id = id_da_requisicao();
+$row = null;
 
-<!--    <input type="hidden" name="acao" value="delete">-->
-<!--    <input type="hidden" name="id" id="id_id" value="--><?php //echo $row->id;?><!--">-->
-    <div class="mb-3">
-        <label>Nome</label>
-        <input type="text" name="nome" id="id_nome" class="form-control" required disabled value="<?php echo $row->nome;?>">
-    </div>
-    <div class="mb-3">
-        <label>E-mail</label>
-        <input type="text" name="email" id="id_email" class="form-control" required disabled value="<?php echo $row->email;?>">
-    </div>
-    <div class="mb-3">
-        <label>Data de nascimento</label>
-        <input type="date" name="data_nascimento" id="id_data_nascimento" required disabled class="form-control" value="<?php echo $row->data_nascimento;?>">
-    </div>
+if ($id !== null) {
+    $stmt = $conn->prepare('SELECT id, nome, email, data_nascimento FROM usuarios WHERE id = ?');
+    $stmt->bind_param('i', $id);
+    $stmt->execute();
+    $row = $stmt->get_result()->fetch_object();
+    $stmt->close();
+}
 
+if (!$row) { ?>
+    <p class="alert alert-danger">Usuário não encontrado.</p>
+    <a class="btn btn-secondary" href="?page=listar">Voltar</a>
+<?php } else { ?>
 
+<p class="alert alert-warning">Confira os dados antes de excluir. A ação não pode ser desfeita.</p>
 
-    <div class="mb3">
+<div class="mb-3">
+    <label>Nome</label>
+    <input type="text" class="form-control" disabled value="<?= e($row->nome) ?>">
+</div>
+<div class="mb-3">
+    <label>E-mail</label>
+    <input type="text" class="form-control" disabled value="<?= e($row->email) ?>">
+</div>
+<div class="mb-3">
+    <label>Data de nascimento</label>
+    <input type="date" class="form-control" disabled value="<?= e($row->data_nascimento) ?>">
+</div>
 
-        <?php
-             echo "<a class='btn btn-danger' onclick=\"if (confirm('Tem certeza que deseja excluir?')){
-        location.href='?page=salvar&acao=delete&id=".$row->id."';}else{location.href='?page=listar';}\"> Excluir</a>"
-        ?>
+<!--
+    A exclusão vai por POST, não por link. Um GET que apaga registro é
+    disparado por qualquer coisa que carregue a URL — inclusive um crawler
+    ou uma imagem numa página de terceiro.
+-->
+<form action="?page=salvar" method="post"
+      onsubmit="return confirm('Tem certeza que deseja excluir?');">
+    <input type="hidden" name="acao" value="delete">
+    <input type="hidden" name="id" value="<?= (int) $row->id ?>">
+    <button type="submit" class="btn btn-danger">Excluir</button>
+    <a class="btn btn-secondary" href="?page=listar">Cancelar</a>
+</form>
 
-
-               <!--        <p>Deseja excluir o cadastro?</p>-->
-<!--        <button type="submit" class="btn btn-primary" onclick="if (confirm('Tem certeza que deseja Exluir?')){location.href='?page=salvar$acao=excluir'">Excluir</button>-->
-    </div>
-
+<?php } ?>

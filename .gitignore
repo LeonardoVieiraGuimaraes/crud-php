@@ -1,0 +1,10 @@
+# IDE
+.idea/
+.vscode/
+
+# Credenciais locais
+.env
+*.local.php
+
+# PHP
+vendor/
